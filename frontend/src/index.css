@@ -1,0 +1,60 @@
+/* Global styles */
+body {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+}
+
+.content {
+    min-height: calc(100vh - 56px); /* Subtract navbar height */
+    padding-bottom: 2rem;
+}
+
+/* Card animations */
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+/* Form styles */
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Loading spinner */
+.spinner-border {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+/* Navbar styles */
+.navbar-brand {
+    font-weight: bold;
+}
+
+.nav-link.active {
+    font-weight: bold;
+}
+
+/* Alert styles */
+.alert {
+    border-radius: 8px;
+}
+
+/* Button styles */
+.btn {
+    border-radius: 8px;
+    padding: 10px 20px;
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+}
