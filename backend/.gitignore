@@ -1,23 +1,288 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
-
-# testing
-/coverage
-
-# production
-/build
-
-# misc
-.DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
+node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+package-lock.json
+yarn.lock
+
+.env
+.env.*
+!.env.example
+.env.local
+.env.development
+.env.production
+.env.staging
+.env.test
+
+# ============================================
+# DEPENDENCY DIRECTORIES
+# ============================================
+dist/
+build/
+out/
+.next/
+.nuxt/
+
+# ============================================
+# LOGS - NEVER commit log files
+# ============================================
+logs/
+*.log
+*.log.*
+log.txt
+console.log
+
+# ============================================
+# DATABASE FILES - NEVER commit database files
+# ============================================
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+pg_data/
+postgres-data/
+data/
+*.dump
+*.sql.gz
+*.backup
+
+# ============================================
+# OS FILES - System generated files
+# ============================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# ============================================
+# IDE FILES - Editor specific files
+# ============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.classpath
+.project
+.settings/
+*.iml
+*.ipr
+*.iws
+.idea/
+.idea_modules/
+*.orig
+*.rej
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# ============================================
+# COMPILED FILES - Never commit compiled code
+# ============================================
+*.class
+*.jar
+*.war
+*.ear
+*.pid
+*.seed
+*.pid.lock
+*.gz
+*.7z
+*.rar
+*.zip
+*.tar
+*.gz
+
+# ============================================
+# TEST COVERAGE - Don't commit test coverage reports
+# ============================================
+coverage/
+.nyc_output/
+.junit/
+test-results/
+coverage.lcov
+lcov.info
+
+# ============================================
+# SECURITY FILES - Private keys and certificates
+# ============================================
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*.pem
+*.csr
+*.p7b
+*.p7c
+*.spc
+*.der
+*.cer
+private/
+cert/
+certificates/
+keys/
+*.secret
+
+# ============================================
+# TEMP FILES - Temporary files
+# ============================================
+tmp/
+temp/
+*.tmp
+*.temp
+*.cache
+*.cached
+
+# ============================================
+# BACKUP FILES - Backup and archive files
+# ============================================
+*.bak
+*.backup
+*.old
+*.orig
+*.rej
+*.swo
+*.swp
+*~
+*.merge
+*.local
+
+# ============================================
+# DOCKER FILES - Don't commit Docker volumes
+# ============================================
+docker-data/
+docker-compose.override.yml
+.dockerignore
+
+# ============================================
+# CI/CD FILES - Platform specific files
+# ============================================
+.deploy/
+.deployments/
+.sls/
+serverless/
+.cache/
+.github/
+.gitlab/
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+
+# ============================================
+# PERFORMANCE FILES - Performance monitoring
+# ============================================
+*.heapdump
+*.heapsnapshot
+*.cpuprofile
+*.prof
+*.snapshot
+
+# ============================================
+# PM2 FILES - PM2 runtime files
+# ============================================
+.pm2/
+pm2-*.log
+
+# ============================================
+# NODEMON FILES - Nodemon runtime
+# ============================================
+.nodemon/
+
+# ============================================
+# TS NODE CACHE - TypeScript cache
+# ============================================
+.ts-node/
+
+# ============================================
+# GIT FILES - Git specific
+# ============================================
+*.orig
+*.merge
+*.mergebackup
+*.gitattributes
+.gitignore
+.gitmodules
+.gitkeep
+
+# ============================================
+# NPM FILES - Npm specific
+# ============================================
+npm-debug.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.lerna-debug.log*
+
+# ============================================
+# PARAMOUNT - Never commit these!
+# ============================================
+# Secrets
+*.secret
+*.secrets
+*.key
+*.pem
+*.crt
+*.csr
+
+# Credentials
+*.cred
+*.creds
+*.credentials
+*.auth
+*.token
+*.tokens
+
+# ============================================
+# FRONTEND SPECIFIC - If React/Next.js
+# ============================================
+frontend/node_modules/
+frontend/build/
+frontend/dist/
+frontend/.next/
+frontend/out/
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+frontend/.env.development
+
+# ============================================
+# BACKEND SPECIFIC - Your auth-api files
+# ============================================
+src/config/database.sqlite
+src/config/*.sqlite
+uploads/
+files/
+storage/
+public/uploads/
+public/files/
+storage/uploads/
+
+# ============================================
+# MISCELLANEOUS - Catch all other files
+# ============================================
+*.swp
+*.swo
+*~
+*.orig
+*.rej
+*.old
+*.bak
+*.log
+*.tmp
+*.temp
+*.cache
+*.cached
+*.DS_Store
+Thumbs.db
+desktop.ini
