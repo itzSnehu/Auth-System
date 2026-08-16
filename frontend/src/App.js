@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import Register from './components/Register';
 import Login from './components/Login';
 import Home from './components/Home';
+import Profile from './components/Profile';
 import ProtectedRoute from './components/ProtectedRoute';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -24,6 +25,12 @@ function App() {
                             <Route path="/" element={
                                 <ProtectedRoute>
                                     <Home />
+                                </ProtectedRoute>
+                            } />
+
+                            <Route path="/profile" element={
+                                <ProtectedRoute>
+                                    <Profile />
                                 </ProtectedRoute>
                             } />
                             
