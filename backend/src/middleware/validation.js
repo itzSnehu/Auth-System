@@ -63,3 +63,43 @@ export const validateLogin = (req, res, next) => {
     
     next();
 };
+
+
+// Validate profile update
+export const validateProfileUpdate = (req, res, next) => {
+    const { firstName, lastName, email, password } = req.body;
+    const errors = [];
+
+    // Validate name fields (if provided)
+    if (firstName !== undefined && firstName.length > 50) {
+        errors.push('First name must be less than 50 characters');
+    }
+    if (lastName !== undefined && lastName.length > 50) {
+        errors.push('Last name must be less than 50 characters');
+    }
+
+    // Validate email (if provided)
+    if (email !== undefined) {
+        if (!email) {
+            errors.push('Email cannot be empty');
+        } else if (!validateEmail(email)) {
+            errors.push('Invalid email format');
+        }
+    }
+
+    // Validate password (if provided)
+    if (password !== undefined && password.length > 0) {
+        if (!validatePassword(password)) {
+            errors.push('Password must be at least 8 characters with uppercase, lowercase, and number');
+        }
+    }
+
+    if (errors.length > 0) {
+        return res.status(400).json({
+            success: false,
+            errors
+        });
+    }
+
+    next();
+};
