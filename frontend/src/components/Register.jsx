@@ -69,12 +69,16 @@ const Register = () => {
             
             if (response.success) {
                 setAuthUser(response.data.user);
-                setSuccessMessage('Registration successful! Redirecting...');
-                
-                // Redirect after 2 seconds
-                setTimeout(() => {
-                    navigate('/');
-                }, 2000);
+                 // ✅ Show verification message
+                    if (response.data.requiresEmailVerification) {
+                        setSuccessMessage(
+                            'Registration successful! Please check your email to verify your account.'
+                        );
+                        // Don't redirect immediately - show message
+                    } else {
+                        setSuccessMessage('Registration successful! Redirecting...');
+                        setTimeout(() => navigate('/'), 2000);
+                    }
             }
         } catch (error) {
             if (error.errors) {

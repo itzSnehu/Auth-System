@@ -1,21 +1,19 @@
 import { query } from '../config/database.js';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
+import { randomBytes } from 'node:crypto';  // ✅ Import randomBytes directly
 
 dotenv.config();
 
-// Think of this as a User class - it defines ALL operations with users
 class User {
     
     // CREATE: Add a new user
     static async create(userData) {
         const { username, email, password, firstName, lastName } = userData;
         
-        // 1. Hash the password (scramble it!)
         const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS) || 10;
         const passwordHash = await bcrypt.hash(password, saltRounds);
         
-        // 2. Insert into database
         const sql = `
             INSERT INTO users (username, email, password_hash, first_name, last_name)
             VALUES ($1, $2, $3, $4, $5)
@@ -24,7 +22,7 @@ class User {
         
         const values = [username, email, passwordHash, firstName, lastName];
         const result = await query(sql, values);
-        return result.rows[0]; // Return created user (without password)
+        return result.rows[0];
     }
     
     // READ: Find user by email
@@ -69,115 +67,187 @@ class User {
         return await bcrypt.compare(password, hashedPassword);
     }
 
-// Create email verification token
+    // ============================================
+    // EMAIL VERIFICATION METHODS
+    // ============================================
 
-static async createEmailVerification(userId) {
-    const token = crypto.randomBytes(32).toString('hex');
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-    
-    const sql = `
-        INSERT INTO email_verifications (user_id, token, expires_at)
-        VALUES ($1, $2, $3)
-        RETURNING token
-    `;
-    const result = await query(sql, [userId, token, expiresAt]);
-    return result.rows[0].token;
-}
+    // ✅ FIXED: Create email verification token
+    static async createEmailVerification(userId) {
+        // Use randomBytes directly (not crypto.randomBytes)
+        const token = randomBytes(32).toString('hex');  // ✅ Now works!
+        const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+        
+        const sql = `
+            INSERT INTO email_verifications (user_id, token, expires_at)
+            VALUES ($1, $2, $3)
+            RETURNING token
+        `;
+        const result = await query(sql, [userId, token, expiresAt]);
+        return result.rows[0].token;
+    }
 
-// Verify email
-static async verifyEmail(token) {
-    // Find verification record
-    const findSql = `
-        SELECT user_id, expires_at, verified_at
-        FROM email_verifications
-        WHERE token = $1
-    `;
-    const result = await query(findSql, [token]);
-    
-    if (result.rows.length === 0) {
-        throw new Error('Invalid verification token');
+    // Verify email
+    static async verifyEmail(token) {
+        const findSql = `
+            SELECT user_id, expires_at, verified_at
+            FROM email_verifications
+            WHERE token = $1
+        `;
+        const result = await query(findSql, [token]);
+        
+        if (result.rows.length === 0) {
+            throw new Error('Invalid verification token');
+        }
+        
+        const verification = result.rows[0];
+        
+        if (verification.verified_at) {
+            throw new Error('Email already verified');
+        }
+        
+        if (new Date() > verification.expires_at) {
+            throw new Error('Verification token expired');
+        }
+        
+        const updateSql = `
+            UPDATE users 
+            SET is_verified = true, 
+                email_verified_at = CURRENT_TIMESTAMP,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = $1
+            RETURNING id, username, email
+        `;
+        const updatedUser = await query(updateSql, [verification.user_id]);
+        
+        const markUsedSql = `
+            UPDATE email_verifications 
+            SET verified_at = CURRENT_TIMESTAMP
+            WHERE token = $1
+        `;
+        await query(markUsedSql, [token]);
+        
+        return updatedUser.rows[0];
     }
-    
-    const verification = result.rows[0];
-    
-    if (verification.verified_at) {
-        throw new Error('Email already verified');
-    }
-    
-    if (new Date() > verification.expires_at) {
-        throw new Error('Verification token expired');
-    }
-    
-    // Update user as verified
-    const updateSql = `
-        UPDATE users 
-        SET is_verified = true, 
-            email_verified_at = CURRENT_TIMESTAMP,
-            updated_at = CURRENT_TIMESTAMP
-        WHERE id = $1
-        RETURNING id, username, email
-    `;
-    const updatedUser = await query(updateSql, [verification.user_id]);
-    
-    // Mark verification as used
-    const markUsedSql = `
-        UPDATE email_verifications 
-        SET verified_at = CURRENT_TIMESTAMP
-        WHERE token = $1
-    `;
-    await query(markUsedSql, [token]);
-    
-    return updatedUser.rows[0];
-}
 
-// Check if email is verified
-static async isEmailVerified(userId) {
-    const sql = 'SELECT is_verified FROM users WHERE id = $1';
-    const result = await query(sql, [userId]);
-    return result.rows[0]?.is_verified || false;
-}
+    // Check if email is verified
+    static async isEmailVerified(userId) {
+        const sql = 'SELECT is_verified FROM users WHERE id = $1';
+        const result = await query(sql, [userId]);
+        return result.rows[0]?.is_verified || false;
+    }
 
-// UPDATE: Update user
-static async update(id, updateData) {
-    const fields = [];
-    const values = [];
-    let paramIndex = 1;
-    
-    // Build dynamic update query
-    if (updateData.firstName) {
-        fields.push(`first_name = $${paramIndex++}`);
-        values.push(updateData.firstName);
+    // UPDATE: Update user
+    static async update(id, updateData) {
+        const fields = [];
+        const values = [];
+        let paramIndex = 1;
+        
+        if (updateData.firstName) {
+            fields.push(`first_name = $${paramIndex++}`);
+            values.push(updateData.firstName);
+        }
+        if (updateData.lastName) {
+            fields.push(`last_name = $${paramIndex++}`);
+            values.push(updateData.lastName);
+        }
+        if (updateData.email) {
+            fields.push(`email = $${paramIndex++}`);
+            values.push(updateData.email);
+        }
+        if (updateData.password) {
+            const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS) || 10;
+            const passwordHash = await bcrypt.hash(updateData.password, saltRounds);
+            fields.push(`password_hash = $${paramIndex++}`);
+            values.push(passwordHash);
+        }
+        
+        fields.push(`updated_at = CURRENT_TIMESTAMP`);
+        values.push(id);
+        
+        const sql = `
+            UPDATE users 
+            SET ${fields.join(', ')}
+            WHERE id = $${paramIndex}
+            RETURNING id, username, email, first_name, last_name, role
+        `;
+        
+        const result = await query(sql, values);
+        return result.rows[0];
     }
-    if (updateData.lastName) {
-        fields.push(`last_name = $${paramIndex++}`);
-        values.push(updateData.lastName);
+
+    // ============================================
+    // PASSWORD RESET METHODS
+    // ============================================
+
+    // Create password reset token
+    static async createPasswordResetToken(userId) {
+        const token = randomBytes(32).toString('hex');  // ✅ Using randomBytes
+        const expiresAt = new Date(Date.now() + 3600000); // 1 hour
+        
+        const sql = `
+            INSERT INTO password_reset_tokens (user_id, token, expires_at)
+            VALUES ($1, $2, $3)
+            RETURNING token
+        `;
+        const result = await query(sql, [userId, token, expiresAt]);
+        return result.rows[0].token;
     }
-    if (updateData.email) {
-        fields.push(`email = $${paramIndex++}`);
-        values.push(updateData.email);
+
+    // Verify password reset token
+    static async verifyPasswordResetToken(token) {
+        const sql = `
+            SELECT user_id, expires_at, used
+            FROM password_reset_tokens
+            WHERE token = $1
+        `;
+        const result = await query(sql, [token]);
+        
+        if (result.rows.length === 0) {
+            throw new Error('Invalid or expired reset token');
+        }
+        
+        const resetData = result.rows[0];
+        
+        if (resetData.used) {
+            throw new Error('Token has already been used');
+        }
+        
+        if (new Date() > resetData.expires_at) {
+            throw new Error('Token has expired');
+        }
+        
+        return resetData.user_id;
     }
-    if (updateData.password) {
+
+    // Mark token as used
+    static async markResetTokenUsed(token) {
+        const sql = `
+            UPDATE password_reset_tokens
+            SET used = true
+            WHERE token = $1
+        `;
+        await query(sql, [token]);
+    }
+
+    // Reset password using token
+    static async resetPassword(token, newPassword) {
+        const userId = await this.verifyPasswordResetToken(token);
+        
         const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS) || 10;
-        const passwordHash = await bcrypt.hash(updateData.password, saltRounds);
-        fields.push(`password_hash = $${paramIndex++}`);
-        values.push(passwordHash);
+        const passwordHash = await bcrypt.hash(newPassword, saltRounds);
+        
+        const updateSql = `
+            UPDATE users
+            SET password_hash = $1,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = $2
+            RETURNING id, username, email
+        `;
+        
+        const result = await query(updateSql, [passwordHash, userId]);
+        await this.markResetTokenUsed(token);
+        return result.rows[0];
     }
-    
-    fields.push(`updated_at = CURRENT_TIMESTAMP`);
-    values.push(id);
-    
-    const sql = `
-        UPDATE users 
-        SET ${fields.join(', ')}
-        WHERE id = $${paramIndex}
-        RETURNING id, username, email, first_name, last_name, role
-    `;
-    
-    const result = await query(sql, values);
-    return result.rows[0];
-}
-
 }
 
 export default User;
-

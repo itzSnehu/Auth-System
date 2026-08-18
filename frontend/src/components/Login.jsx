@@ -26,25 +26,38 @@ const Login = () => {
         setError('');
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setError('');
+  // Add this check after login
+const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
 
-        try {
-            const { rememberMe, ...credentials } = formData;
-            const response = await loginService(credentials);
-            
-            if (response.success) {
-                setAuthUser(response.data.user);
-                navigate('/');
+    try {
+        const response = await loginService(formData);
+        
+        if (response.success) {
+            // ✅ Check if email is verified
+            if (response.data.user && !response.data.user.is_verified) {
+                setError('Please verify your email before logging in. Check your inbox.');
+                await logout(); // Log out the user
+                setLoading(false);
+                return;
             }
-        } catch (error) {
-            setError(error.message || 'Login failed. Please check your credentials.');
-        } finally {
-            setLoading(false);
+            
+            setAuthUser(response.data.user);
+            navigate('/');
         }
-    };
+    } catch (error) {
+        // Handle rate limiting
+        if (error.message?.includes('Too many attempts')) {
+            setError(error.message);
+        } else {
+            setError(error.message || 'Login failed');
+        }
+    } finally {
+        setLoading(false);
+    }
+};
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);

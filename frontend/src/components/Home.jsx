@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getCurrentUser } from '../services/authService';
+import VerificationNotice from './VerificationNotice';
 
 const Home = () => {
     const { user, logout } = useAuth();
@@ -30,6 +31,10 @@ const Home = () => {
 
     return (
         <div className="container mt-4">
+            {/* ✅ Show verification notice if not verified */}
+            {userDetails && !userDetails.is_verified && (
+                <VerificationNotice />
+            )}
             {/* Welcome Banner */}
             <div className="row mb-4">
                 <div className="col-12">

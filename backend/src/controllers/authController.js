@@ -1,4 +1,3 @@
-import crypto from 'crypto';
 import User from '../models/User.js';
 import { generateTokens, verifyToken } from '../utils/jwt.js';
 import { query } from '../config/database.js';

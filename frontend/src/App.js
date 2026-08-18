@@ -6,6 +6,9 @@ import Register from './components/Register';
 import Login from './components/Login';
 import Home from './components/Home';
 import Profile from './components/Profile';
+import VerifyEmail from './components/VerifyEmail';
+import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
 import ProtectedRoute from './components/ProtectedRoute';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -20,6 +23,9 @@ function App() {
                             {/* Public Routes */}
                             <Route path="/register" element={<Register />} />
                             <Route path="/login" element={<Login />} />
+                            <Route path="/verify-email" element={<VerifyEmail />} />
+                            <Route path="/forgot-password" element={<ForgotPassword />} />
+                            <Route path="/reset-password" element={<ResetPassword />} />
                             
                             {/* Protected Routes */}
                             <Route path="/" element={
