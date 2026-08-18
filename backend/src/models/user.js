@@ -248,6 +248,36 @@ class User {
         await this.markResetTokenUsed(token);
         return result.rows[0];
     }
+
+
+
+    // Add 2FA columns to User
+static async enable2FA(userId, secret) {
+    const sql = `
+        UPDATE users 
+        SET two_factor_secret = $1, 
+            two_factor_enabled = true,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = $2
+        RETURNING id, username, email, two_factor_enabled
+    `;
+    const result = await query(sql, [secret, userId]);
+    return result.rows[0];
+}
+
+static async disable2FA(userId) {
+    const sql = `
+        UPDATE users 
+        SET two_factor_secret = NULL, 
+            two_factor_enabled = false,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = $1
+        RETURNING id, username, email, two_factor_enabled
+    `;
+    const result = await query(sql, [userId]);
+    return result.rows[0];
+}
+
 }
 
 export default User;
