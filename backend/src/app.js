@@ -3,7 +3,6 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import xss from 'xss';
-import mongoSanitize from 'express-mongo-sanitize';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -13,7 +12,6 @@ import authRoutes from './routes/authRoutes.js';
 
 const app = express();
 
-app.use(mongoSanitize()); // Prevent NoSQL injection
 
 // Custom XSS middleware
 app.use((req, res, next) => {
